@@ -1,1 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Analyst's Desk: Prague Spring 1968</title>
+    <style>
+        :root {
+            --paper: #f4f1ea;
+            --ink: #2b2b2b;
+            --stamp-red: #8b0000;
+            --highlight: #e8dcc4;
+        }
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #333;
+            color: var(--ink);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        #game-container {
+            background-color: var(--paper);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #ccc;
+            position: relative;
+        }
+        h1, h2, h3 {
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--ink);
+            padding-bottom: 5px;
+        }
+        h1 { color: var(--stamp-red); text-align: center; }
+        .classified-stamp {
+            color: var(--stamp-red);
+            border: 3px solid var(--stamp-red);
+            padding: 5px 10px;
+            display: inline-block;
+            font-weight: bold;
+            transform: rotate(-5deg);
+            position: absolute;
+            top: 20px;
+            right: 30px;
+        }
+        .image-placeholder {
+            width: 100%;
+            height: 250px;
+            background-color: #ddd;
+            border: 2px dashed #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: #666;
+            font-style: italic;
+            overflow: hidden;
+        }
+        .image-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .context-box {
+            background-color: var(--highlight);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--ink);
+        }
+        .fragment-card {
+            border: 1px solid var(--ink);
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fff;
+        }
+        .fragment-text {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        select {
+            font-family: 'Courier New', Courier, monospace;
+            padding: 5px;
+            font-size: 1em;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: var(--ink);
+            color: var(--paper);
+            font-family: 'Courier New', Courier, monospace;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+        button:hover { background-color: var(--stamp-red); }
+        button:disabled { background-color: #999; cursor: not-allowed; }
+        .feedback {
+            padding: 10px;
+            margin-top: 10px;
+            display: none;
+            font-weight: bold;
+        }
+        .feedback.error { color: var(--stamp-red); border: 1px solid var(--stamp-red); display: block; }
+        .feedback.success { color: green; border: 1px solid green; display: block; }
+        #next-btn { display: none; width: 100%; margin-top: 20px; }
+        
+        /* Timeline styling */
+        .timeline { display: flex; justify-content: space-between; margin-bottom: 30px; font-weight: bold; }
+        .time-node { color: #999; }
+        .time-node.active { color: var(--stamp-red); text-decoration: underline; }
+    </style>
+</head>
+<body>
 
+<div id="game-container">
+    <div class="classified-stamp">TOP SECRET // EYES ONLY</div>
+    <h1>The Analyst's Desk</h1>
+    
+    <div class="timeline" id="timeline-ui">
+        <span class="time-node" id="nav-0">JAN '68</span>
+        <span class="time-node" id="nav-1">APR '68</span>
+        <span class="time-node" id="nav-2">JUN '68</span>
+        <span class="time-node" id="nav-3">JUL '68</span>
+        <span class="time-node" id="nav-4">AUG '68</span>
+    </div>
+
+    <div id="content-area">
+        <h2 id="node-title">Loading...</h2>
+        
+        <div class="image-placeholder">
+            <img id="node-image" src="" alt="Historical Visual Context" onerror="this.style.display='none'; this.parentElement.innerHTML='[Insert Historical Image Here]';">
+        </div>
+
+        <div class="context-box" id="node-context">Loading context...</div>
+        
+        <div id="sorting-area">
+            <h3>Intelligence Intercepts:</h3>
+            <div id="fragments-container"></div>
+        </div>
+
+        <button id="next-btn" onclick="nextNode()">Advance Timeline</button>
+    </div>
+</div>
+
+<script>
+    const timelineData = [
+        {
+            title: "January 1968 — The Changing of the Guard",
+            image: "dubcek_portrait.jpg", // Update with your image file name later
+            context: "Alexander Dubček replaces the unpopular Stalinist Antonín Novotný as First Secretary of the Communist Party. Dubček recognizes the economy is failing and the people are unhappy. He promises reforms to save socialism, intending for the Communist Party to retain total control while becoming more popular.",
+            fragments: [
+                {
+                    text: "We must address the economic stagnation and build trust with the people, but the Communist Party must remain the ultimate authority.",
+                    correct: "dubcek",
+                    errorMsg: "Error! Neither the Soviets (who wanted zero change) nor the radical students (who wanted multi-party democracy) supported this. Dubček sought to improve the system from within."
+                }
+            ]
+        },
+        {
+            title: "April 1968 — The Blueprint",
+            image: "action_programme.jpg",
+            context: "The Communist Party officially publishes the 'Action Programme', formalizing the Prague Spring. It promises an end to censorship, freedom of speech, and relaxed economic control. However, it reaffirms loyalty to the Warsaw Pact and bans opposition political parties.",
+            fragments: [
+                {
+                    text: "Censorship is hereby abolished, and citizens may freely debate policy.",
+                    correct: "dubcek",
+                    errorMsg: "Error! This was a central, official promise of Dubček's Action Programme."
+                },
+                {
+                    text: "If the press is free to criticize the state, the socialist system will collapse from within.",
+                    correct: "brezhnev",
+                    errorMsg: "Error! This represents the orthodox Soviet view. Brezhnev viewed free speech as a dangerous counter-revolutionary force."
+                }
+            ]
+        },
+        {
+            title: "June 1968 — The Grassroots Push",
+            image: "two_thousand_words.jpg",
+            context: "Journalist Ludvík Vaculík publishes the 'Two Thousand Words' manifesto. It calls for rapid, grassroots liberalization, including independent political parties outside state control. This terrifies Dubček (who loses control) and Brezhnev (who sees capitalism returning).",
+            fragments: [
+                {
+                    text: "We demand the right to form independent political parties and urge citizens to hold their own local elections immediately.",
+                    correct: "students",
+                    errorMsg: "Error! This demand was far more radical than anything Dubček proposed. Only the grassroots students and intellectuals wanted this."
+                }
+            ]
+        },
+        {
+            title: "July 1968 — The Warsaw Ultimatum",
+            image: "warsaw_letter.jpg",
+            context: "Soviet leader Leonid Brezhnev and allies meet in Warsaw without Czechoslovakia. They send an ultimatum demanding Dubček reinstate censorship and crush the radical students. Dubček attempts to negotiate but refuses to reverse the popular reforms.",
+            fragments: [
+                {
+                    text: "The forces of imperialism are using your relaxed laws to tear Czechoslovakia away from the socialist brotherhood.",
+                    correct: "brezhnev",
+                    errorMsg: "Error! This is classic orthodox Soviet rhetoric, accusing Western imperialists of manipulating the reforms."
+                },
+                {
+                    text: "We pledge our absolute military loyalty to the Soviet Union; you have nothing to fear from our domestic policies.",
+                    correct: "dubcek",
+                    errorMsg: "Error! Dubček made repeated, desperate public assurances of military loyalty to the Warsaw Pact to prevent an invasion."
+                }
+            ]
+        },
+        {
+            title: "August 20–21, 1968 — Operation Danube",
+            image: "invasion_tanks.jpg",
+            context: "Approximately 500,000 troops and thousands of tanks from the Warsaw Pact cross the border. The Prague Spring is crushed. Dubček is arrested. This establishes the 'Brezhnev Doctrine': the USSR will militarily intervene in any socialist state that drifts toward capitalism.",
+            fragments: [] // No fragments in the final node
+        }
+    ];
+
+    let currentNode = 0;
+
+    function renderNode() {
+        const data = timelineData[currentNode];
+        
+        // Update UI
+        document.getElementById("node-title").innerText = data.title;
+        document.getElementById("node-context").innerText = data.context;
+        
+        // Reset image handling
+        const imgEl = document.getElementById("node-image");
+        imgEl.style.display = 'block';
+        imgEl.src = data.image; 
+        
+        // Update Timeline visual
+        document.querySelectorAll('.time-node').forEach((el, index) => {
+            el.className = index === currentNode ? 'time-node active' : 'time-node';
+        });
+
+        const fragContainer = document.getElementById("fragments-container");
+        fragContainer.innerHTML = '';
+        document.getElementById("next-btn").style.display = 'none';
+
+        if (data.fragments.length === 0) {
+            document.getElementById("sorting-area").style.display = 'none';
+            document.getElementById("next-btn").innerText = "End Briefing";
+            document.getElementById("next-btn").style.display = 'block';
+            return;
+        }
+
+        document.getElementById("sorting-area").style.display = 'block';
+
+        data.fragments.forEach((frag, index) => {
+            const card = document.createElement('div');
+            card.className = 'fragment-card';
+            
+            card.innerHTML = `
+                <div class="fragment-text">"${frag.text}"</div>
+                <select id="select-${index}" onchange="checkAnswer(${index}, '${frag.correct}')">
+                    <option value="none">-- Classify this Intel --</option>
+                    <option value="dubcek">Alexander Dubček (Reform Communism)</option>
+                    <option value="brezhnev">Leonid Brezhnev (Orthodox Communism)</option>
+                    <option value="students">Radical Students (Grassroots Democracy)</option>
+                </select>
+                <div id="feedback-${index}" class="feedback"></div>
+            `;
+            fragContainer.appendChild(card);
+        });
+    }
+
+    function checkAnswer(index, correctValue) {
+        const selectEl = document.getElementById(`select-${index}`);
+        const feedbackEl = document.getElementById(`feedback-${index}`);
+        const selectedValue = selectEl.value;
+
+        if (selectedValue === "none") {
+            feedbackEl.className = "feedback";
+            return;
+        }
+
+        if (selectedValue === correctValue) {
+            feedbackEl.innerText = "Intel Verified. Correct categorization.";
+            feedbackEl.className = "feedback success";
+            selectEl.disabled = true; // Lock it in
+        } else {
+            feedbackEl.innerText = timelineData[currentNode].fragments[index].errorMsg;
+            feedbackEl.className = "feedback error";
+            selectEl.value = "none"; // Reset so they try again
+        }
+
+        checkAllComplete();
+    }
+
+    function checkAllComplete() {
+        const data = timelineData[currentNode];
+        let allCorrect = true;
+        
+        data.fragments.forEach((frag, index) => {
+            const selectEl = document.getElementById(`select-${index}`);
+            if (selectEl.value !== frag.correct) {
+                allCorrect = false;
+            }
+        });
+
+        if (allCorrect) {
+            document.getElementById("next-btn").style.display = 'block';
+        }
+    }
+
+    function nextNode() {
+        if (currentNode < timelineData.length - 1) {
+            currentNode++;
+            renderNode();
+        } else {
+            document.getElementById("content-area").innerHTML = `
+                <h2 style="color: var(--stamp-red)">BRIEFING COMPLETE</h2>
+                <p><strong>Dossier Finalized.</strong> You have successfully categorized the ideological factions of the 1968 Prague Spring.</p>
+                <p>You are now prepared to analyze the primary source document: The Action Programme.</p>
+            `;
+        }
+    }
+
+    // Initialize Game
+    renderNode();
+</script>
+
+</body>
+</html>
