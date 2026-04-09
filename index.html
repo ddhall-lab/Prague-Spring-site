@@ -58,11 +58,19 @@
             color: #666;
             font-style: italic;
             overflow: hidden;
+            position: relative;
         }
         .image-placeholder img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+        }
+        .missing-image-text {
+            z-index: 1;
         }
         .context-box {
             background-color: var(--highlight);
@@ -89,18 +97,20 @@
             margin-bottom: 10px;
         }
         button {
-            background-color: var(--ink);
+            background-color: var(--stamp-red);
             color: var(--paper);
             font-family: 'Courier New', Courier, monospace;
             border: none;
-            padding: 10px 20px;
+            padding: 15px 20px;
             cursor: pointer;
-            font-size: 1.1em;
+            font-size: 1.2em;
+            font-weight: bold;
             text-transform: uppercase;
             margin-top: 10px;
+            width: 100%;
+            transition: background-color 0.3s;
         }
-        button:hover { background-color: var(--stamp-red); }
-        button:disabled { background-color: #999; cursor: not-allowed; }
+        button:hover { background-color: #660000; }
         .feedback {
             padding: 10px;
             margin-top: 10px;
@@ -109,12 +119,12 @@
         }
         .feedback.error { color: var(--stamp-red); border: 1px solid var(--stamp-red); display: block; }
         .feedback.success { color: green; border: 1px solid green; display: block; }
-        #next-btn { display: none; width: 100%; margin-top: 20px; }
+        #next-btn { display: none; margin-top: 30px; }
         
-        /* Timeline styling */
         .timeline { display: flex; justify-content: space-between; margin-bottom: 30px; font-weight: bold; }
         .time-node { color: #999; }
         .time-node.active { color: var(--stamp-red); text-decoration: underline; }
+        .instruction-text { font-size: 0.9em; font-style: italic; color: #555; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -134,14 +144,15 @@
     <div id="content-area">
         <h2 id="node-title">Loading...</h2>
         
-        <div class="image-placeholder">
-            <img id="node-image" src="" alt="Historical Visual Context" onerror="this.style.display='none'; this.parentElement.innerHTML='[Insert Historical Image Here]';">
+        <div class="image-placeholder" id="image-container">
+            <span class="missing-image-text">[Historical Photo Not Found - Proceed with Text Analysis]</span>
         </div>
 
         <div class="context-box" id="node-context">Loading context...</div>
         
         <div id="sorting-area">
             <h3>Intelligence Intercepts:</h3>
+            <p class="instruction-text">Analyze and correctly classify all intercepts below to unlock the next timeline file.</p>
             <div id="fragments-container"></div>
         </div>
 
@@ -153,7 +164,7 @@
     const timelineData = [
         {
             title: "January 1968 — The Changing of the Guard",
-            image: "dubcek_portrait.jpg", // Update with your image file name later
+            image: "dubcek_portrait.jpg",
             context: "Alexander Dubček replaces the unpopular Stalinist Antonín Novotný as First Secretary of the Communist Party. Dubček recognizes the economy is failing and the people are unhappy. He promises reforms to save socialism, intending for the Communist Party to retain total control while becoming more popular.",
             fragments: [
                 {
@@ -213,7 +224,7 @@
             title: "August 20–21, 1968 — Operation Danube",
             image: "invasion_tanks.jpg",
             context: "Approximately 500,000 troops and thousands of tanks from the Warsaw Pact cross the border. The Prague Spring is crushed. Dubček is arrested. This establishes the 'Brezhnev Doctrine': the USSR will militarily intervene in any socialist state that drifts toward capitalism.",
-            fragments: [] // No fragments in the final node
+            fragments: [] 
         }
     ];
 
@@ -222,16 +233,16 @@
     function renderNode() {
         const data = timelineData[currentNode];
         
-        // Update UI
         document.getElementById("node-title").innerText = data.title;
         document.getElementById("node-context").innerText = data.context;
         
-        // Reset image handling
-        const imgEl = document.getElementById("node-image");
-        imgEl.style.display = 'block';
-        imgEl.src = data.image; 
+        // Safely insert the image. If it fails, it just hides the broken image icon, leaving the background text visible.
+        const imageContainer = document.getElementById("image-container");
+        imageContainer.innerHTML = `
+            <span class="missing-image-text">[Historical Photo Not Found - Proceed with Text Analysis]</span>
+            <img src="${data.image}" alt="Historical Visual Context" onerror="this.style.display='none';">
+        `;
         
-        // Update Timeline visual
         document.querySelectorAll('.time-node').forEach((el, index) => {
             el.className = index === currentNode ? 'time-node active' : 'time-node';
         });
@@ -280,11 +291,11 @@
         if (selectedValue === correctValue) {
             feedbackEl.innerText = "Intel Verified. Correct categorization.";
             feedbackEl.className = "feedback success";
-            selectEl.disabled = true; // Lock it in
+            selectEl.disabled = true; 
         } else {
             feedbackEl.innerText = timelineData[currentNode].fragments[index].errorMsg;
             feedbackEl.className = "feedback error";
-            selectEl.value = "none"; // Reset so they try again
+            selectEl.value = "none"; 
         }
 
         checkAllComplete();
@@ -302,7 +313,15 @@
         });
 
         if (allCorrect) {
-            document.getElementById("next-btn").style.display = 'block';
+            const nextBtn = document.getElementById("next-btn");
+            nextBtn.style.display = 'block';
+            
+            if (currentNode < timelineData.length - 1) {
+                const nextMonth = timelineData[currentNode + 1].title.split('—')[0].trim();
+                nextBtn.innerText = `Advance to ${nextMonth} ➔`;
+            } else {
+                nextBtn.innerText = "End Briefing";
+            }
         }
     }
 
@@ -319,7 +338,6 @@
         }
     }
 
-    // Initialize Game
     renderNode();
 </script>
 
