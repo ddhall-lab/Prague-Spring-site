@@ -137,4 +137,276 @@
             background-color: var(--stamp-red); color: var(--paper);
             border: none; padding: 15px 20px; cursor: pointer;
             font-size: 1.2em; font-weight: bold; font-family: 'Courier New', Courier, monospace;
-            text-transform: uppercase; margin-top: 10px; width: 1
+            text-transform: uppercase; margin-top: 10px; width: 100%;
+            transition: background-color 0.3s;
+        }
+        .action-btn:hover { background-color: #660000; }
+        .feedback { padding: 10px; margin-top: 10px; display: none; font-weight: bold; }
+        .feedback.error { color: var(--stamp-red); border: 1px solid var(--stamp-red); display: block; }
+        .feedback.success { color: green; border: 1px solid green; display: block; }
+        #next-btn { display: none; margin-top: 30px; }
+        
+        .timeline { display: flex; justify-content: space-between; margin-bottom: 30px; font-weight: bold; }
+        .time-node { color: #999; }
+        .time-node.active { color: var(--stamp-red); text-decoration: underline; }
+        .instruction-text { font-size: 0.9em; font-style: italic; color: #555; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div id="dossier-modal">
+    <div class="dossier-content">
+        <button class="close-btn" onclick="toggleDossier()">X CLOSE</button>
+        <h2 style="text-align: center; border-bottom: 2px solid #2b2b2b;">PERSONNEL DATABASE</h2>
+        
+        <div class="bio-card">
+            <h3>Alexander Dubček (Reform Communist)</h3>
+            <p><strong>Position:</strong> First Secretary of the Communist Party of Czechoslovakia (KSČ).</p>
+            <p><strong>Ideology:</strong> Dubček was a loyal communist, but he realized the Soviet economic model was failing. He believed communism could be "fixed" from within. He coined the phrase "Socialism with a human face."</p>
+            <p><strong>Goals:</strong> He wanted to end extreme state censorship, allow basic freedom of speech, and improve the economy. However, he <strong>did not</strong> want a multi-party democracy and he constantly promised the Soviets that Czechoslovakia would never leave the Warsaw Pact military alliance.</p>
+        </div>
+
+        <div class="bio-card">
+            <h3>Leonid Brezhnev (Orthodox Communist)</h3>
+            <p><strong>Position:</strong> General Secretary of the Soviet Union.</p>
+            <p><strong>Ideology:</strong> A strict hardliner. He believed that the Communist Party must maintain absolute, unquestioned monopoly over every aspect of life in the Eastern Bloc. He viewed free speech as a "bourgeois" disease that led to capitalism.</p>
+            <p><strong>Goals:</strong> To maintain the "buffer zone" of Eastern Europe at all costs. He ultimately formulated the <em>Brezhnev Doctrine</em>, declaring the USSR had the right to use military force against any socialist country that tried to reform its system.</p>
+        </div>
+
+        <div class="bio-card">
+            <h3>Radical Students & Intellectuals (Grassroots Democracy)</h3>
+            <p><strong>Position:</strong> Citizens, writers (like Ludvík Vaculík), and university students.</p>
+            <p><strong>Ideology:</strong> They believed Dubček's reforms did not go far enough. Once Dubček removed censorship, these groups used the newspapers to demand massive, rapid change.</p>
+            <p><strong>Goals:</strong> They wanted true democracy: the creation of rival political parties, free elections independent of the Communist Party, and a complete separation from Soviet influence. Both Dubček and Brezhnev saw them as a major threat to state control.</p>
+        </div>
+    </div>
+</div>
+
+<div id="game-container">
+    <div class="classified-stamp">TOP SECRET</div>
+    
+    <div class="header-bar">
+        <h1>The Analyst's Desk</h1>
+        <button class="db-button" onclick="toggleDossier()">View Personnel Files</button>
+    </div>
+    
+    <div class="timeline" id="timeline-ui">
+        <span class="time-node" id="nav-0">JAN '68</span>
+        <span class="time-node" id="nav-1">APR '68</span>
+        <span class="time-node" id="nav-2">JUN '68</span>
+        <span class="time-node" id="nav-3">JUL '68</span>
+        <span class="time-node" id="nav-4">AUG '68</span>
+    </div>
+
+    <div id="content-area">
+        <h2 id="node-title">Loading...</h2>
+        
+        <div class="image-placeholder" id="image-container">
+            <span class="missing-image-text">[Historical Photo Not Found - Proceed with Text Analysis]</span>
+        </div>
+
+        <div class="context-box" id="node-context">Loading context...</div>
+        
+        <div id="sorting-area">
+            <h3>Intelligence Intercepts:</h3>
+            <p class="instruction-text">Analyze and correctly classify all intercepts below to unlock the next timeline file. <em>(Stuck? Check the Personnel Files at the top!)</em></p>
+            <div id="fragments-container"></div>
+        </div>
+
+        <button id="next-btn" class="action-btn" onclick="nextNode()">Advance Timeline</button>
+    </div>
+</div>
+
+<script>
+    // Toggle the Personnel Database Modal
+    function toggleDossier() {
+        const modal = document.getElementById('dossier-modal');
+        if (modal.style.display === 'flex') {
+            modal.style.display = 'none';
+        } else {
+            modal.style.display = 'flex';
+        }
+    }
+
+    const timelineData = [
+        {
+            title: "January 1968 — The Changing of the Guard",
+            image: "dubcek-photo.jpg", 
+            context: "Alexander Dubček replaces the unpopular Stalinist Antonín Novotný as First Secretary of the Communist Party. Dubček recognizes the economy is failing and the people are unhappy. He promises reforms to save socialism, intending for the Communist Party to retain total control while becoming more popular.",
+            fragments: [
+                {
+                    text: "We must address the economic stagnation and build trust with the people, but the Communist Party must remain the ultimate authority.",
+                    correct: "dubcek",
+                    errorMsg: "Error! Neither the Soviets (who wanted zero change) nor the radical students (who wanted multi-party democracy) supported this. Check the Personnel Files to see who wanted 'Socialism with a human face'."
+                }
+            ]
+        },
+        {
+            title: "April 1968 — The Blueprint",
+            image: "action-programme.jpg",
+            context: "The Communist Party officially publishes the 'Action Programme', formalizing the Prague Spring. It promises an end to censorship, freedom of speech, and relaxed economic control. However, it reaffirms loyalty to the Warsaw Pact and bans opposition political parties.",
+            fragments: [
+                {
+                    text: "Censorship is hereby abolished, and citizens may freely debate policy.",
+                    correct: "dubcek",
+                    errorMsg: "Error! This was a central, official promise of Dubček's Action Programme."
+                },
+                {
+                    text: "If the press is free to criticize the state, the socialist system will collapse from within.",
+                    correct: "brezhnev",
+                    errorMsg: "Error! This represents the orthodox Soviet view. Brezhnev viewed free speech as a dangerous counter-revolutionary force."
+                }
+            ]
+        },
+        {
+            title: "June 1968 — The Grassroots Push",
+            image: "two-thousand-words.jpg",
+            context: "Journalist Ludvík Vaculík publishes the 'Two Thousand Words' manifesto. It calls for rapid, grassroots liberalization, including independent political parties outside state control. This terrifies Dubček (who loses control) and Brezhnev (who sees capitalism returning).",
+            fragments: [
+                {
+                    text: "We demand the right to form independent political parties and urge citizens to hold their own local elections immediately.",
+                    correct: "students",
+                    errorMsg: "Error! This demand was far more radical than anything Dubček proposed. Only the grassroots students and intellectuals wanted this."
+                }
+            ]
+        },
+        {
+            title: "July 1968 — The Warsaw Ultimatum",
+            image: "warsaw-letter.jpg",
+            context: "Soviet leader Leonid Brezhnev and allies meet in Warsaw without Czechoslovakia. They send an ultimatum demanding Dubček reinstate censorship and crush the radical students. Dubček attempts to negotiate but refuses to reverse the popular reforms.",
+            fragments: [
+                {
+                    text: "The forces of imperialism are using your relaxed laws to tear Czechoslovakia away from the socialist brotherhood.",
+                    correct: "brezhnev",
+                    errorMsg: "Error! This is classic orthodox Soviet rhetoric, accusing Western imperialists of manipulating the reforms."
+                },
+                {
+                    text: "We pledge our absolute military loyalty to the Soviet Union; you have nothing to fear from our domestic policies.",
+                    correct: "dubcek",
+                    errorMsg: "Error! Dubček made repeated, desperate public assurances of military loyalty to the Warsaw Pact to prevent an invasion."
+                }
+            ]
+        },
+        {
+            title: "August 20–21, 1968 — Operation Danube",
+            image: "invasion-tanks.jpg",
+            context: "Approximately 500,000 troops and thousands of tanks from the Warsaw Pact cross the border. The Prague Spring is crushed. Dubček is arrested. This establishes the 'Brezhnev Doctrine': the USSR will militarily intervene in any socialist state that drifts toward capitalism.",
+            fragments: [] 
+        }
+    ];
+
+    let currentNode = 0;
+
+    function renderNode() {
+        const data = timelineData[currentNode];
+        
+        document.getElementById("node-title").innerText = data.title;
+        document.getElementById("node-context").innerText = data.context;
+        
+        const imageContainer = document.getElementById("image-container");
+        imageContainer.innerHTML = `
+            <span class="missing-image-text">[Historical Photo Not Found - Proceed with Text Analysis]</span>
+            <img src="${data.image}" alt="Historical Visual Context" onerror="this.style.display='none';">
+        `;
+        
+        document.querySelectorAll('.time-node').forEach((el, index) => {
+            el.className = index === currentNode ? 'time-node active' : 'time-node';
+        });
+
+        const fragContainer = document.getElementById("fragments-container");
+        fragContainer.innerHTML = '';
+        document.getElementById("next-btn").style.display = 'none';
+
+        if (data.fragments.length === 0) {
+            document.getElementById("sorting-area").style.display = 'none';
+            document.getElementById("next-btn").innerText = "End Briefing";
+            document.getElementById("next-btn").style.display = 'block';
+            return;
+        }
+
+        document.getElementById("sorting-area").style.display = 'block';
+
+        data.fragments.forEach((frag, index) => {
+            const card = document.createElement('div');
+            card.className = 'fragment-card';
+            
+            card.innerHTML = `
+                <div class="fragment-text">"${frag.text}"</div>
+                <select id="select-${index}" onchange="checkAnswer(${index}, '${frag.correct}')">
+                    <option value="none">-- Classify this Intel --</option>
+                    <option value="dubcek">Alexander Dubček (Reform Communism)</option>
+                    <option value="brezhnev">Leonid Brezhnev (Orthodox Communism)</option>
+                    <option value="students">Radical Students (Grassroots Democracy)</option>
+                </select>
+                <div id="feedback-${index}" class="feedback"></div>
+            `;
+            fragContainer.appendChild(card);
+        });
+    }
+
+    function checkAnswer(index, correctValue) {
+        const selectEl = document.getElementById(`select-${index}`);
+        const feedbackEl = document.getElementById(`feedback-${index}`);
+        const selectedValue = selectEl.value;
+
+        if (selectedValue === "none") {
+            feedbackEl.className = "feedback";
+            return;
+        }
+
+        if (selectedValue === correctValue) {
+            feedbackEl.innerText = "Intel Verified. Correct categorization.";
+            feedbackEl.className = "feedback success";
+            selectEl.disabled = true; 
+        } else {
+            feedbackEl.innerText = timelineData[currentNode].fragments[index].errorMsg;
+            feedbackEl.className = "feedback error";
+            selectEl.value = "none"; 
+        }
+
+        checkAllComplete();
+    }
+
+    function checkAllComplete() {
+        const data = timelineData[currentNode];
+        let allCorrect = true;
+        
+        data.fragments.forEach((frag, index) => {
+            const selectEl = document.getElementById(`select-${index}`);
+            if (selectEl.value !== frag.correct) {
+                allCorrect = false;
+            }
+        });
+
+        if (allCorrect) {
+            const nextBtn = document.getElementById("next-btn");
+            nextBtn.style.display = 'block';
+            
+            if (currentNode < timelineData.length - 1) {
+                const nextMonth = timelineData[currentNode + 1].title.split('—')[0].trim();
+                nextBtn.innerText = `Advance to ${nextMonth} ➔`;
+            } else {
+                nextBtn.innerText = "End Briefing";
+            }
+        }
+    }
+
+    function nextNode() {
+        if (currentNode < timelineData.length - 1) {
+            currentNode++;
+            renderNode();
+        } else {
+            document.getElementById("content-area").innerHTML = `
+                <h2 style="color: var(--stamp-red)">BRIEFING COMPLETE</h2>
+                <p><strong>Dossier Finalized.</strong> You have successfully categorized the ideological factions of the 1968 Prague Spring.</p>
+                <p>You are now prepared to analyze the primary source document: The Action Programme.</p>
+            `;
+        }
+    }
+
+    // Start game on load
+    renderNode();
+</script>
+
+</body>
+</html>
