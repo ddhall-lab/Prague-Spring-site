@@ -10,6 +10,7 @@
             --ink: #2b2b2b;
             --stamp-red: #8b0000;
             --highlight: #e8dcc4;
+            --folder: #d1bfae;
         }
         body {
             font-family: 'Courier New', Courier, monospace;
@@ -29,12 +30,31 @@
             border: 1px solid #ccc;
             position: relative;
         }
-        h1, h2, h3 {
-            text-transform: uppercase;
+        
+        /* Header & Top Bar */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border-bottom: 2px solid var(--ink);
-            padding-bottom: 5px;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
         }
-        h1 { color: var(--stamp-red); text-align: center; }
+        h1 { color: var(--stamp-red); margin: 0; font-size: 1.8em; text-transform: uppercase; }
+        
+        .db-button {
+            background-color: var(--ink);
+            color: var(--paper);
+            border: none;
+            padding: 8px 15px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+        .db-button:hover { background-color: #555; }
+
         .classified-stamp {
             color: var(--stamp-red);
             border: 3px solid var(--stamp-red);
@@ -45,301 +65,76 @@
             position: absolute;
             top: 20px;
             right: 30px;
+            z-index: 10;
         }
-        .image-placeholder {
-            width: 100%;
-            height: 250px;
-            background-color: #ddd;
-            border: 2px dashed #999;
-            display: flex;
-            align-items: center;
+        
+        /* Modal / Pop-up Dossier Styles */
+        #dossier-modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 100;
             justify-content: center;
-            margin-bottom: 20px;
-            color: #666;
-            font-style: italic;
-            overflow: hidden;
+            align-items: center;
+        }
+        .dossier-content {
+            background-color: var(--folder);
+            padding: 30px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid var(--ink);
+            box-shadow: 10px 10px 0px rgba(0,0,0,0.3);
             position: relative;
         }
-        .image-placeholder img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .close-btn {
             position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 2;
+            top: 15px; right: 20px;
+            background: var(--stamp-red);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
         }
-        .missing-image-text {
-            z-index: 1;
-        }
-        .context-box {
-            background-color: var(--highlight);
+        .bio-card {
+            background-color: var(--paper);
+            border: 1px solid var(--ink);
             padding: 15px;
             margin-bottom: 20px;
+        }
+        .bio-card h3 { margin-top: 0; color: var(--stamp-red); border-bottom: 1px dashed var(--ink); }
+
+        /* General Game Styles */
+        h2 { text-transform: uppercase; border-bottom: 1px solid var(--ink); }
+        .image-placeholder {
+            width: 100%; height: 250px;
+            background-color: #ddd; border: 2px dashed #999;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px; color: #666; font-style: italic;
+            position: relative; overflow: hidden;
+        }
+        .image-placeholder img {
+            width: 100%; height: 100%; object-fit: cover;
+            position: absolute; top: 0; left: 0; z-index: 2;
+        }
+        .missing-image-text { z-index: 1; }
+        .context-box {
+            background-color: var(--highlight);
+            padding: 15px; margin-bottom: 20px;
             border-left: 4px solid var(--ink);
         }
         .fragment-card {
             border: 1px solid var(--ink);
-            padding: 15px;
-            margin-bottom: 15px;
-            background-color: #fff;
+            padding: 15px; margin-bottom: 15px; background-color: #fff;
         }
-        .fragment-text {
-            font-weight: bold;
-            font-size: 1.1em;
-            margin-bottom: 10px;
-        }
-        select {
-            font-family: 'Courier New', Courier, monospace;
-            padding: 5px;
-            font-size: 1em;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        button {
-            background-color: var(--stamp-red);
-            color: var(--paper);
-            font-family: 'Courier New', Courier, monospace;
-            border: none;
-            padding: 15px 20px;
-            cursor: pointer;
-            font-size: 1.2em;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-top: 10px;
-            width: 100%;
-            transition: background-color 0.3s;
-        }
-        button:hover { background-color: #660000; }
-        .feedback {
-            padding: 10px;
-            margin-top: 10px;
-            display: none;
-            font-weight: bold;
-        }
-        .feedback.error { color: var(--stamp-red); border: 1px solid var(--stamp-red); display: block; }
-        .feedback.success { color: green; border: 1px solid green; display: block; }
-        #next-btn { display: none; margin-top: 30px; }
-        
-        .timeline { display: flex; justify-content: space-between; margin-bottom: 30px; font-weight: bold; }
-        .time-node { color: #999; }
-        .time-node.active { color: var(--stamp-red); text-decoration: underline; }
-        .instruction-text { font-size: 0.9em; font-style: italic; color: #555; margin-bottom: 15px; }
-    </style>
-</head>
-<body>
-
-<div id="game-container">
-    <div class="classified-stamp">TOP SECRET // EYES ONLY</div>
-    <h1>The Analyst's Desk</h1>
-    
-    <div class="timeline" id="timeline-ui">
-        <span class="time-node" id="nav-0">JAN '68</span>
-        <span class="time-node" id="nav-1">APR '68</span>
-        <span class="time-node" id="nav-2">JUN '68</span>
-        <span class="time-node" id="nav-3">JUL '68</span>
-        <span class="time-node" id="nav-4">AUG '68</span>
-    </div>
-
-    <div id="content-area">
-        <h2 id="node-title">Loading...</h2>
-        
-        <div class="image-placeholder" id="image-container">
-            <span class="missing-image-text">[Historical Photo Not Found - Proceed with Text Analysis]</span>
-        </div>
-
-        <div class="context-box" id="node-context">Loading context...</div>
-        
-        <div id="sorting-area">
-            <h3>Intelligence Intercepts:</h3>
-            <p class="instruction-text">Analyze and correctly classify all intercepts below to unlock the next timeline file.</p>
-            <div id="fragments-container"></div>
-        </div>
-
-        <button id="next-btn" onclick="nextNode()">Advance Timeline</button>
-    </div>
-</div>
-
-<script>
-    const timelineData = [
-        {
-            title: "January 1968 — The Changing of the Guard",
-            image: "dubcek_portrait.jpg",
-            context: "Alexander Dubček replaces the unpopular Stalinist Antonín Novotný as First Secretary of the Communist Party. Dubček recognizes the economy is failing and the people are unhappy. He promises reforms to save socialism, intending for the Communist Party to retain total control while becoming more popular.",
-            fragments: [
-                {
-                    text: "We must address the economic stagnation and build trust with the people, but the Communist Party must remain the ultimate authority.",
-                    correct: "dubcek",
-                    errorMsg: "Error! Neither the Soviets (who wanted zero change) nor the radical students (who wanted multi-party democracy) supported this. Dubček sought to improve the system from within."
-                }
-            ]
-        },
-        {
-            title: "April 1968 — The Blueprint",
-            image: "action_programme.jpg",
-            context: "The Communist Party officially publishes the 'Action Programme', formalizing the Prague Spring. It promises an end to censorship, freedom of speech, and relaxed economic control. However, it reaffirms loyalty to the Warsaw Pact and bans opposition political parties.",
-            fragments: [
-                {
-                    text: "Censorship is hereby abolished, and citizens may freely debate policy.",
-                    correct: "dubcek",
-                    errorMsg: "Error! This was a central, official promise of Dubček's Action Programme."
-                },
-                {
-                    text: "If the press is free to criticize the state, the socialist system will collapse from within.",
-                    correct: "brezhnev",
-                    errorMsg: "Error! This represents the orthodox Soviet view. Brezhnev viewed free speech as a dangerous counter-revolutionary force."
-                }
-            ]
-        },
-        {
-            title: "June 1968 — The Grassroots Push",
-            image: "two_thousand_words.jpg",
-            context: "Journalist Ludvík Vaculík publishes the 'Two Thousand Words' manifesto. It calls for rapid, grassroots liberalization, including independent political parties outside state control. This terrifies Dubček (who loses control) and Brezhnev (who sees capitalism returning).",
-            fragments: [
-                {
-                    text: "We demand the right to form independent political parties and urge citizens to hold their own local elections immediately.",
-                    correct: "students",
-                    errorMsg: "Error! This demand was far more radical than anything Dubček proposed. Only the grassroots students and intellectuals wanted this."
-                }
-            ]
-        },
-        {
-            title: "July 1968 — The Warsaw Ultimatum",
-            image: "warsaw_letter.jpg",
-            context: "Soviet leader Leonid Brezhnev and allies meet in Warsaw without Czechoslovakia. They send an ultimatum demanding Dubček reinstate censorship and crush the radical students. Dubček attempts to negotiate but refuses to reverse the popular reforms.",
-            fragments: [
-                {
-                    text: "The forces of imperialism are using your relaxed laws to tear Czechoslovakia away from the socialist brotherhood.",
-                    correct: "brezhnev",
-                    errorMsg: "Error! This is classic orthodox Soviet rhetoric, accusing Western imperialists of manipulating the reforms."
-                },
-                {
-                    text: "We pledge our absolute military loyalty to the Soviet Union; you have nothing to fear from our domestic policies.",
-                    correct: "dubcek",
-                    errorMsg: "Error! Dubček made repeated, desperate public assurances of military loyalty to the Warsaw Pact to prevent an invasion."
-                }
-            ]
-        },
-        {
-            title: "August 20–21, 1968 — Operation Danube",
-            image: "invasion_tanks.jpg",
-            context: "Approximately 500,000 troops and thousands of tanks from the Warsaw Pact cross the border. The Prague Spring is crushed. Dubček is arrested. This establishes the 'Brezhnev Doctrine': the USSR will militarily intervene in any socialist state that drifts toward capitalism.",
-            fragments: [] 
-        }
-    ];
-
-    let currentNode = 0;
-
-    function renderNode() {
-        const data = timelineData[currentNode];
-        
-        document.getElementById("node-title").innerText = data.title;
-        document.getElementById("node-context").innerText = data.context;
-        
-        // Safely insert the image. If it fails, it just hides the broken image icon, leaving the background text visible.
-        const imageContainer = document.getElementById("image-container");
-        imageContainer.innerHTML = `
-            <span class="missing-image-text">[Historical Photo Not Found - Proceed with Text Analysis]</span>
-            <img src="${data.image}" alt="Historical Visual Context" onerror="this.style.display='none';">
-        `;
-        
-        document.querySelectorAll('.time-node').forEach((el, index) => {
-            el.className = index === currentNode ? 'time-node active' : 'time-node';
-        });
-
-        const fragContainer = document.getElementById("fragments-container");
-        fragContainer.innerHTML = '';
-        document.getElementById("next-btn").style.display = 'none';
-
-        if (data.fragments.length === 0) {
-            document.getElementById("sorting-area").style.display = 'none';
-            document.getElementById("next-btn").innerText = "End Briefing";
-            document.getElementById("next-btn").style.display = 'block';
-            return;
-        }
-
-        document.getElementById("sorting-area").style.display = 'block';
-
-        data.fragments.forEach((frag, index) => {
-            const card = document.createElement('div');
-            card.className = 'fragment-card';
-            
-            card.innerHTML = `
-                <div class="fragment-text">"${frag.text}"</div>
-                <select id="select-${index}" onchange="checkAnswer(${index}, '${frag.correct}')">
-                    <option value="none">-- Classify this Intel --</option>
-                    <option value="dubcek">Alexander Dubček (Reform Communism)</option>
-                    <option value="brezhnev">Leonid Brezhnev (Orthodox Communism)</option>
-                    <option value="students">Radical Students (Grassroots Democracy)</option>
-                </select>
-                <div id="feedback-${index}" class="feedback"></div>
-            `;
-            fragContainer.appendChild(card);
-        });
-    }
-
-    function checkAnswer(index, correctValue) {
-        const selectEl = document.getElementById(`select-${index}`);
-        const feedbackEl = document.getElementById(`feedback-${index}`);
-        const selectedValue = selectEl.value;
-
-        if (selectedValue === "none") {
-            feedbackEl.className = "feedback";
-            return;
-        }
-
-        if (selectedValue === correctValue) {
-            feedbackEl.innerText = "Intel Verified. Correct categorization.";
-            feedbackEl.className = "feedback success";
-            selectEl.disabled = true; 
-        } else {
-            feedbackEl.innerText = timelineData[currentNode].fragments[index].errorMsg;
-            feedbackEl.className = "feedback error";
-            selectEl.value = "none"; 
-        }
-
-        checkAllComplete();
-    }
-
-    function checkAllComplete() {
-        const data = timelineData[currentNode];
-        let allCorrect = true;
-        
-        data.fragments.forEach((frag, index) => {
-            const selectEl = document.getElementById(`select-${index}`);
-            if (selectEl.value !== frag.correct) {
-                allCorrect = false;
-            }
-        });
-
-        if (allCorrect) {
-            const nextBtn = document.getElementById("next-btn");
-            nextBtn.style.display = 'block';
-            
-            if (currentNode < timelineData.length - 1) {
-                const nextMonth = timelineData[currentNode + 1].title.split('—')[0].trim();
-                nextBtn.innerText = `Advance to ${nextMonth} ➔`;
-            } else {
-                nextBtn.innerText = "End Briefing";
-            }
-        }
-    }
-
-    function nextNode() {
-        if (currentNode < timelineData.length - 1) {
-            currentNode++;
-            renderNode();
-        } else {
-            document.getElementById("content-area").innerHTML = `
-                <h2 style="color: var(--stamp-red)">BRIEFING COMPLETE</h2>
-                <p><strong>Dossier Finalized.</strong> You have successfully categorized the ideological factions of the 1968 Prague Spring.</p>
-                <p>You are now prepared to analyze the primary source document: The Action Programme.</p>
-            `;
-        }
-    }
-
-    renderNode();
-</script>
-
-</body>
-</html>
+        .fragment-text { font-weight: bold; font-size: 1.1em; margin-bottom: 10px; }
+        select { font-family: 'Courier New', Courier, monospace; padding: 5px; font-size: 1em; width: 100%; margin-bottom: 10px; }
+        .action-btn {
+            background-color: var(--stamp-red); color: var(--paper);
+            border: none; padding: 15px 20px; cursor: pointer;
+            font-size: 1.2em; font-weight: bold; font-family: 'Courier New', Courier, monospace;
+            text-transform: uppercase; margin-top: 10px; width: 1
